@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // components
 import Header from "./components/Header/Header";
@@ -11,26 +11,7 @@ const App = () => {
   const [showAddTask, setShowAddTask] = useState(false);
 
   // global (basic) state
-  const [tasks, setTasks] = useState([
-    {
-      id: 1,
-      text: 'Doctor Appointment',
-      day: 'Feb 5th at 3:09pm',
-      reminder: true
-    },
-    {
-      id: 2,
-      text: 'Doctor Appointment',
-      day: 'Feb 5th at 3:09pm',
-      reminder: true
-    },
-    {
-      id: 3,
-      text: 'Doctor Appointment',
-      day: 'Feb 5th at 3:09pm',
-      reminder: true
-    },
-  ]);
+  const [tasks, setTasks] = useState([]);
 
   // Add Task to the global state
   const addTask = (task ) => {
@@ -54,6 +35,32 @@ const App = () => {
     setTasks(tasks.map(task => task.id === id ? {...task, reminder: !task.reminder} : task));
   };
 
+  // Fetch tasks
+  const fetchTasks = async () => {
+    //backend uri
+    const jsonServerUri = 'http://localhost:5000/tasks';
+    const res = await fetch(jsonServerUri);
+
+    // convert to json
+    const data = await res.json();
+
+    return data;
+  };
+
+  // Using useEffect hook to feth all the tasks from the backend
+  useEffect(()=>{
+    // runs every render
+    const getTasks = async () => {
+      const tasksFromBackend = await fetchTasks();
+      // Update local state
+      setTasks(tasksFromBackend)
+    };
+
+    getTasks();
+  }, []);
+  // if we add a second aparameter as an empty array => Runs only on the first render
+  // if we add a second aparameter as an array => Runs only on the first render and any time any dependency value changes
+  
   return (
     // uso de gragment para abarcar los componentes
     <div className="container">
